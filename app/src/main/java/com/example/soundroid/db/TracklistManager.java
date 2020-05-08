@@ -4,7 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import com.example.soundroid.db.SoundroidContract.SoundroidTrack;
 import com.example.soundroid.db.SoundroidContract.SoundroidTracklist;
@@ -79,7 +82,8 @@ public class TracklistManager {
                         cursor.getInt(8),
                         cursor.getLong(9),
                         cursor.getInt(10),
-                        cursor.getInt(11)
+                        cursor.getInt(11),
+                        Uri.parse(cursor.getString(12))
                 ));
             }
         };

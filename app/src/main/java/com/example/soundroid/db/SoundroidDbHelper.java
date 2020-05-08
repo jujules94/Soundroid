@@ -8,7 +8,7 @@ import com.example.soundroid.db.SoundroidContract.*;
 public class SoundroidDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 6;
     public static final String DATABASE_NAME = "Soundroid.db";
 
     private static final String SQL_CREATE_TRACK =
@@ -24,7 +24,8 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
                     SoundroidTrack.COLUMN_NAME_MINUTES + " INTEGER," +
                     SoundroidTrack.COLUMN_NAME_SECONDS + " INTEGER," +
                     SoundroidTrack.COLUMN_NAME_MARK + " INTEGER," +
-                    SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS + " INTEGER)";
+                    SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS + " INTEGER," +
+                    SoundroidTrack.COLUMN_NAME_URI + " TEXT)";
 
     private static final String SQL_DELETE_TRACK = "DROP TABLE IF EXISTS " + SoundroidTrack.TABLE_NAME;
 

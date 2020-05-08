@@ -1,5 +1,7 @@
 package com.example.soundroid.db;
 
+import android.net.Uri;
+
 public class Track implements Tracklistable {
 
     private final String hash;
@@ -14,9 +16,9 @@ public class Track implements Tracklistable {
     private final int seconds;
     private final int mark;
     private final int numberOfClick;
+    private final Uri uri;
 
-    public Track(String artist, String album, String name, int diskNumber, int trackNumber, int bitrate, long date, int minutes, int seconds) {
-        this.hash = artist + album + name;
+    public Track(String artist, String album, String name, int diskNumber, int trackNumber, int bitrate, long date, int minutes, int seconds, Uri uri) {
         this.name = name;
         this.artist = artist;
         this.album = album;
@@ -28,6 +30,8 @@ public class Track implements Tracklistable {
         this.seconds = seconds;
         this.mark = 0;
         this.numberOfClick = 0;
+        this.uri = uri;
+        this.hash = generateHash();
     }
 
     @Override
@@ -75,8 +79,14 @@ public class Track implements Tracklistable {
         return mark;
     }
 
-    public int getNumberOfClick() {
-        return numberOfClick;
+    public int getNumberOfClick() { return numberOfClick; }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public String generateHash() {
+        return artist + album + name + String.valueOf(date) + String.valueOf(minutes) + String.valueOf(seconds);
     }
 
     @Override

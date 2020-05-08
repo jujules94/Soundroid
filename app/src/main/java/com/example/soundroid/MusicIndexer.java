@@ -4,8 +4,14 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+
+import com.example.soundroid.db.Track;
+import com.example.soundroid.db.TrackManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,53 +19,59 @@ import java.util.concurrent.TimeUnit;
 
 public class MusicIndexer {
 
-    public static List<Audio> indexMusic(Context context) {
-        List<Audio> audioList = new ArrayList<Audio>();
-
+    /** Method to extract tracks from the file system.
+     * @param context of the database helper.
+     * @return list of tracks
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static void indexMusic(Context context) {
+        List<String> hashes = TrackManager.getHashes(context);
+        List<Track> tracksToAdd = new ArrayList<Track>();
         String[] projection = new String[] {
                 MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.ALBUM,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DATE_ADDED,
                 MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.SIZE
         };
-        String selection = MediaStore.Audio.Media.DURATION +
-                " >= ?";
-        String[] selectionArgs = new String[] {
-                String.valueOf(TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES))
-        };
-        String sortOrder = MediaStore.Audio.Media.DISPLAY_NAME + " ASC";
-
         try (Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection,
-                selection,
-                selectionArgs,
-                sortOrder
-        )) {
-            // Cache column indices.
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
-            int nameColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
-            int durationColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
-            int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE);
-
+                null,
+                null,
+                null
+            )) {
+            /* columns */
+            int _id = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            int _artist = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
+            int _album = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
+            int _title = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+            int _date = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED);
+            int _duration = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+            /* create tracks */
             while (cursor.moveToNext()) {
-                // Get values of columns for a given audio.
-                long id = cursor.getLong(idColumn);
-                String name = cursor.getString(nameColumn);
-                int duration = cursor.getInt(durationColumn);
-                int size = cursor.getInt(sizeColumn);
-
-                Uri contentUri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
-
-                // Stores column values and the contentUri in a local object
-                // that represents the media file.
-                audioList.add(new Audio(contentUri, name, duration, size));
+                Track track = new Track(
+                        cursor.getString(_artist),
+                        cursor.getString(_album),
+                        cursor.getString(_title),
+                        1, 1, 320,
+                        500L, 2, 40,
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(_id)));
+                int index = hashes.indexOf(track.getHash());
+                if (index == -1) {
+                    tracksToAdd.add(track);
+                } else {
+                    hashes.remove(index);
+                }
+            }
+            if (!hashes.isEmpty()) {
+                TrackManager.deleteAll(context, hashes);
+            }
+            if (!tracksToAdd.isEmpty()) {
+                TrackManager.addAll(context, tracksToAdd);
             }
         }
-        Log.d("Indexer", audioList.toString());
-        return audioList;
     }
+
 }

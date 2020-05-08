@@ -18,9 +18,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.example.soundroid.Audio;
 import com.example.soundroid.MusicIndexer;
 import com.example.soundroid.R;
+import com.example.soundroid.db.Track;
+import com.example.soundroid.db.TrackManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public class PlayerFragment extends Fragment {
 
     private Handler threadHandler = new Handler();
     private MediaPlayer mediaPlayer;
-    private List<Audio> tracks;
+    private List<Track> tracks;
     private int currentIndex = 1;
     private boolean playing = false;
 
@@ -45,9 +46,9 @@ public class PlayerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             Log.d("Fragments", "retrieving arguments");
-            tracks = (ArrayList<Audio>) getArguments().get("tracks");
+            tracks = (ArrayList<Track>) getArguments().get("tracks");
         }
-        tracks = MusicIndexer.indexMusic(getContext());
+        tracks = TrackManager.getAll(getContext());
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -138,7 +139,7 @@ public class PlayerFragment extends Fragment {
     private void setupSong() {
         try {
             Log.d("Fragments", "media selected : " + tracks.get(currentIndex));
-            Uri uri = tracks.get(currentIndex).uri;
+            Uri uri = tracks.get(currentIndex).getUri();
             Toast.makeText(getContext(),"Select source: "+ uri,Toast.LENGTH_SHORT).show();
             mediaPlayer.setDataSource(getContext(), uri);
             mediaPlayer.prepareAsync();
@@ -168,14 +169,12 @@ public class PlayerFragment extends Fragment {
         if (currentIndex == tracks.size()-1) nextSong.setEnabled(false);
         else nextSong.setEnabled(true);
     }
-
     private void doChangeSong(int offset) {
         if (currentIndex + offset >= 0 && currentIndex + offset < tracks.size()) {
             currentIndex += offset;
         }
         setCurrentSong();
     }
-
     private void doShuffleTracks() {
         Collections.shuffle(tracks);
         currentIndex = 0;

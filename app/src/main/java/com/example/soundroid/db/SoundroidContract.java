@@ -19,9 +19,10 @@ public final class SoundroidContract {
         public static final String COLUMN_NAME_SECONDS = "seconds";
         public static final String COLUMN_NAME_MARK = "mark";
         public static final String COLUMN_NAME_NUMBEROFCLICKS = "number_of_clicks";
+        public static final String COLUMN_NAME_URI = "uri";
 
         public static String getFields() {
-            return "track.hash, track.artist, track.album, track.name, track.disk_number, track.track_number, track.bitrate, track.date, track.minutes, track.seconds, track.mark, track.number_of_clicks ";
+            return "track.hash, track.artist, track.album, track.name, track.disk_number, track.track_number, track.bitrate, track.date, track.minutes, track.seconds, track.mark, track.number_of_clicks, track.uri ";
         }
 
     }
