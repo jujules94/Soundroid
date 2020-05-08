@@ -1,6 +1,9 @@
 package com.example.soundroid;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -16,6 +19,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -23,7 +28,9 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,11 +38,14 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private SharedPreferences sp;
     private final String[] methods = new String[]{"GET", "POST"};
+    private List<Audio> tracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (!checkPermissionForReadExternalStorage()) requestPermissionForReadExternalStorage();
+        tracks = MusicIndexer.indexMusic(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         sp = getSharedPreferences("PREFS", MODE_PRIVATE);
@@ -54,12 +64,38 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            switch(destination.getId()) {
+                case R.id.nav_home :
+                    NavArgument argument = new NavArgument.Builder().setDefaultValue(tracks).build();
+                    Log.d("Fragments", "set arguments to home fragment");
+                    destination.addArgument("tracks", argument);
+                    break;
+            }
+        });
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    private boolean checkPermissionForReadExternalStorage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int result = this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+            return result == PackageManager.PERMISSION_GRANTED;
+        }
+        return false;
+    }
+
+    private void requestPermissionForReadExternalStorage() {
+        try {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private void shareTrack() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Partage ta musique :");
+        builder.setTitle("Share the current track :");
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
@@ -68,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         else input.setText("https://");
         builder.setView(input);
         builder.setSingleChoiceItems(methods, 0, null);
-        builder.setPositiveButton("ENVOI", (dialog, which) -> {
+        builder.setPositiveButton("SEND", (dialog, which) -> {
             String URL = input.getText().toString();
             int pos = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
             Log.d("SHARE", methods[pos] + " " + URL);
@@ -90,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
             //add args to url;
         }
         StringRequest stringRequest = new StringRequest(request, url, response -> {
-            Toast.makeText(this, "musique partagée !", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "track shared !", Toast.LENGTH_LONG).show();
             Log.d("SHARE", response);
         }, error -> {
             Log.d("SHARE", "error found ! " + error.toString() + " : " + error.networkResponse.statusCode);
