@@ -8,6 +8,9 @@ import android.view.Menu;
 
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
+import com.example.soundroid.db.Tracklist;
+import com.example.soundroid.db.TracklistManager;
+import com.example.soundroid.db.Tracklistable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -19,6 +22,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,11 +60,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Context context = getApplicationContext();
-                Track rapeMe = new Track(
-                        "Nirvana","In Utero","Rape Me",
-                        1,1, 320, System.currentTimeMillis() ,2, 49);
+                /* Track Tests*/
+                Track rapeMe = new Track("Nirvana","In Utero","Rape Me",1,1, 320, System.currentTimeMillis() ,2, 49);
                 Log.d("A001", String.valueOf(TrackManager.add(context, rapeMe)));
                 Log.d("A002", TrackManager.get(context, rapeMe.getHash()).toString());
+                /* Tracklist Tests*/
+                ArrayList<Tracklistable> TL1 = new ArrayList<>(); TL1.add(rapeMe);
+                Tracklist T1 = new Tracklist("Sample", "Sample", TL1);
+                ArrayList<Tracklistable> TL2 = new ArrayList<>(); TL2.add(rapeMe); TL2.add(T1);
+                TracklistManager.delete(context, "In Utero");
+                TracklistManager.delete(context, "Sample");
+                Tracklist T2 = new Tracklist("In Utero", "In Utero", TL2);
+                Log.d("A003", String.valueOf(TracklistManager.create(context, T2)));
+                Log.d("A005", String.valueOf(TracklistManager.create(context, T1)));
+                Log.d("A004", TracklistManager.get(context, "In Utero").toString());
             }
         }).start();
 

@@ -6,13 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.example.soundroid.db.SoundroidContract.SoundroidTrack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 public class TrackManager {
-
-    public TrackManager() {}
 
     /**
      * Convenience method for inserting a track into the database.
@@ -68,15 +62,7 @@ public class TrackManager {
         };
         String selection = SoundroidTrack.COLUMN_NAME_HASH + " = ?";
         String[] selectionArgs = { hash };
-        Cursor cursor = db.query(
-                SoundroidTrack.TABLE_NAME,
-                projection,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                null
-        );
+        Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, selection, selectionArgs,null,null,null);
         if (!cursor.moveToNext()) {
             return null;
         };

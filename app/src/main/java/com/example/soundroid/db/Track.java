@@ -1,6 +1,6 @@
 package com.example.soundroid.db;
 
-public class Track {
+public class Track implements Tracklistable {
 
     private final String hash;
     private final String name;
@@ -30,6 +30,7 @@ public class Track {
         this.numberOfClick = 0;
     }
 
+    @Override
     public String getHash() {
         return hash;
     }
@@ -80,20 +81,7 @@ public class Track {
 
     @Override
     public String toString() {
-        return "Track{" +
-                "hash='" + hash + '\'' +
-                ", name='" + name + '\'' +
-                ", artist='" + artist + '\'' +
-                ", album='" + album + '\'' +
-                ", diskNumber=" + diskNumber +
-                ", trackNumber=" + trackNumber +
-                ", bitrate=" + bitrate +
-                ", date=" + date +
-                ", minutes=" + minutes +
-                ", seconds=" + seconds +
-                ", mark=" + mark +
-                ", numberOfClick=" + numberOfClick +
-                '}';
+        return "Track(" + name + ")";
     }
 
 }
