@@ -32,8 +32,10 @@ public class MusicIndexer {
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ALBUM,
                 MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATE_ADDED,
+                MediaStore.Audio.Media.YEAR,
                 MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.AudioColumns.TRACK,
+                MediaStore.Audio.AudioColumns.ALBUM_ID
         };
         try (Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -47,17 +49,20 @@ public class MusicIndexer {
             int _artist = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
             int _album = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
             int _title = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-            int _date = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED);
+            int _albumId = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID);
+            int _trackId = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TRACK);
+            int _date = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR);
             int _duration = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
             /* create tracks */
             while (cursor.moveToNext()) {
                 Track track = new Track(
                         cursor.getString(_artist),
-                        cursor.getString(_album),
                         cursor.getString(_title),
-                        1, 1, 320,
-                        500L, 2, 40,
+                        cursor.getString(_album),
+                        Integer.parseInt(cursor.getString(_albumId)), Integer.parseInt(cursor.getString(_trackId)), 320,
+                        Long.parseLong(cursor.getString(_date) == null ? "0" : cursor.getString(_date)), 2, 40,
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(_id)));
+                //Log.d("Indexer", Integer.parseInt(cursor.getString(_albumId)) + " " + Integer.parseInt(cursor.getString(_trackId)) + " " + cursor.getString(_date) + " " + cursor.getLong(_duration));
                 int index = hashes.indexOf(track.getHash());
                 if (index == -1) {
                     tracksToAdd.add(track);

@@ -6,12 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
 import com.example.soundroid.db.SoundroidContract.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -129,21 +131,23 @@ public class TrackManager {
                 SoundroidTrack.COLUMN_NAME_MINUTES,
                 SoundroidTrack.COLUMN_NAME_SECONDS,
                 SoundroidTrack.COLUMN_NAME_MARK,
-                SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS
+                SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS,
+                SoundroidTrack.COLUMN_NAME_URI
         };
         Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, null, null,null,null,null);
+        Log.d("TrackManager", Arrays.toString(cursor.getColumnNames()));
         while (cursor.moveToNext()) {
             tracks.add(new Track(
-                    cursor.getString(0),
                     cursor.getString(1),
                     cursor.getString(2),
-                    cursor.getInt(3),
+                    cursor.getString(3),
                     cursor.getInt(4),
                     cursor.getInt(5),
-                    cursor.getLong(6),
-                    cursor.getInt(7),
+                    cursor.getInt(6),
+                    cursor.getLong(7),
                     cursor.getInt(8),
-                    Uri.parse(cursor.getString(9))));
+                    cursor.getInt(9),
+                    Uri.parse(cursor.getString(12))));
         }
         cursor.close();
         return tracks;
