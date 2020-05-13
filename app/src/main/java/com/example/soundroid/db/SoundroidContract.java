@@ -25,6 +25,24 @@ public final class SoundroidContract {
             return "track.hash, track.artist, track.album, track.name, track.disk_number, track.track_number, track.bitrate, track.date, track.minutes, track.seconds, track.mark, track.number_of_clicks, track.uri ";
         }
 
+        public static String[] getProjection() {
+            return new String[] {
+                    SoundroidTrack.COLUMN_NAME_HASH,
+                    SoundroidTrack.COLUMN_NAME_ARTIST,
+                    SoundroidTrack.COLUMN_NAME_ALBUM,
+                    SoundroidTrack.COLUMN_NAME_NAME,
+                    SoundroidTrack.COLUMN_NAME_DISK_NUMBER,
+                    SoundroidTrack.COLUMN_NAME_TRACK_NUMBER,
+                    SoundroidTrack.COLUMN_NAME_BITRATE,
+                    SoundroidTrack.COLUMN_NAME_DATE,
+                    SoundroidTrack.COLUMN_NAME_MINUTES,
+                    SoundroidTrack.COLUMN_NAME_SECONDS,
+                    SoundroidTrack.COLUMN_NAME_MARK,
+                    SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS,
+                    SoundroidTrack.COLUMN_NAME_URI
+            };
+        }
+
     }
 
     public static class SoundroidTracklist implements BaseColumns {

@@ -19,16 +19,14 @@ import java.util.StringJoiner;
 
 public class TrackManager {
 
-    /**
-     * Convenience method for inserting a track into the database.
-     *
+    /** Convenience method for inserting a track into the database.
      * @param context of the database helper.
      * @param track to be inserted.
-     * @return the row ID of the newly inserted track, or -1 if an error occurred or the track already exist.
+     * @return false if an error occurred, true otherwise.
      */
-    public static long add(Context context, Track track) {
+    private static boolean add(Context context, Track track) {
         if (isTrackAlreadyInDb(context, track)) {
-            return -1;
+            return true;
         }
         SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -45,21 +43,24 @@ public class TrackManager {
         values.put(SoundroidTrack.COLUMN_NAME_MARK, track.getMark());
         values.put(SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS, track.getNumberOfClick());
         values.put(SoundroidTrack.COLUMN_NAME_URI, track.getUri().toString());
-        return db.insert(SoundroidTrack.TABLE_NAME, null, values);
+        return (db.insert(SoundroidTrack.TABLE_NAME, null, values) != -1);
     }
 
     /** Convenience method to add tracks into the database.
      * @param context of the database helper.
      * @param tracks to be inserted.
+     * @return false if an error occurred, true otherwise.
      */
-    public static void addAll(Context context, List<Track> tracks) {
+    public static boolean addAll(Context context, List<Track> tracks) {
         for (Track track : tracks) {
-            add(context, track);
+            if (!add(context, track)) {
+                return false;
+            }
         }
+        return true;
     }
 
-    /**
-     * Convenience method to get a track from the database by his hash.
+    /** Convenience method to get a track from the database by his hash.
      * @param context of the database helper.
      * @param hash of the asked track.
      * @return the asked track or null if it doesn't exist in the database.
@@ -67,20 +68,7 @@ public class TrackManager {
     public static Track get(Context context, String hash) {
         SoundroidDbHelper dbHelper = new SoundroidDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
-                SoundroidTrack.COLUMN_NAME_HASH,
-                SoundroidTrack.COLUMN_NAME_ARTIST,
-                SoundroidTrack.COLUMN_NAME_ALBUM,
-                SoundroidTrack.COLUMN_NAME_NAME,
-                SoundroidTrack.COLUMN_NAME_DISK_NUMBER,
-                SoundroidTrack.COLUMN_NAME_TRACK_NUMBER,
-                SoundroidTrack.COLUMN_NAME_BITRATE,
-                SoundroidTrack.COLUMN_NAME_DATE,
-                SoundroidTrack.COLUMN_NAME_MINUTES,
-                SoundroidTrack.COLUMN_NAME_SECONDS,
-                SoundroidTrack.COLUMN_NAME_MARK,
-                SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS
-        };
+        String[] projection = SoundroidContract.SoundroidTrack.getProjection();
         String selection = SoundroidTrack.COLUMN_NAME_HASH + " = ?";
         String[] selectionArgs = { hash };
         Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, selection, selectionArgs,null,null,null);
@@ -119,23 +107,52 @@ public class TrackManager {
     public static List<Track> getAll(Context context) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
         List<Track> tracks = new ArrayList<>();
-        String[] projection = {
-                SoundroidTrack.COLUMN_NAME_HASH,
-                SoundroidTrack.COLUMN_NAME_ARTIST,
-                SoundroidTrack.COLUMN_NAME_ALBUM,
-                SoundroidTrack.COLUMN_NAME_NAME,
-                SoundroidTrack.COLUMN_NAME_DISK_NUMBER,
-                SoundroidTrack.COLUMN_NAME_TRACK_NUMBER,
-                SoundroidTrack.COLUMN_NAME_BITRATE,
-                SoundroidTrack.COLUMN_NAME_DATE,
-                SoundroidTrack.COLUMN_NAME_MINUTES,
-                SoundroidTrack.COLUMN_NAME_SECONDS,
-                SoundroidTrack.COLUMN_NAME_MARK,
-                SoundroidTrack.COLUMN_NAME_NUMBEROFCLICKS,
-                SoundroidTrack.COLUMN_NAME_URI
-        };
+        String[] projection = SoundroidContract.SoundroidTrack.getProjection();
         Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, null, null,null,null,null);
         Log.d("TrackManager", Arrays.toString(cursor.getColumnNames()));
+        while (cursor.moveToNext()) {
+            tracks.add(new Track(
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getInt(4),
+                    cursor.getInt(5),
+                    cursor.getInt(6),
+                    cursor.getLong(7),
+                    cursor.getInt(8),
+                    cursor.getInt(9),
+                    Uri.parse(cursor.getString(12))));
+        }
+        cursor.close();
+        return tracks;
+    }
+
+    /** get a list of tracks that check filters in arguments.
+     * @param context of the database helper.
+     * @param artist filter, null to not use this filter.
+     * @param album filter, null to not use this filter.
+     * @param title filter, null to not use this filter.
+     * @return list of tracks that check filters in arguments.
+     */
+    public static ArrayList<Tracklistable> get(Context context, String artist, String album, String title) {
+        SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
+        ArrayList<Tracklistable> tracks = new ArrayList<>();
+        String[] projection = SoundroidContract.SoundroidTrack.getProjection();
+        String[] selectionArgs = null;
+        StringBuilder selectionBuilder = new StringBuilder();
+        if (artist != null) {
+            selectionBuilder.append(SoundroidTrack.COLUMN_NAME_ARTIST + " = ? ");
+            selectionArgs = new String[] { artist };
+        }
+        if (album != null) {
+            selectionBuilder.append(SoundroidTrack.COLUMN_NAME_ALBUM + " = ? ");
+            selectionArgs = new String[] { album };
+        }
+        if (title != null) {
+            selectionBuilder.append(SoundroidTrack.COLUMN_NAME_NAME + " like ? ");
+            selectionArgs = new String[] { "%" + title + "%" };
+        }
+        Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, selectionBuilder.toString(), selectionArgs,null,null,null);
         while (cursor.moveToNext()) {
             tracks.add(new Track(
                     cursor.getString(1),

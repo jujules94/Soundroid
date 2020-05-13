@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.example.soundroid.db.SoundroidContract.SoundroidTrack;
@@ -46,6 +48,7 @@ public class TracklistManager {
         return true;
     }
 
+
     /** Convenience method to get a tracklist from the database by his hash.
      * @param context of the database helper.
      * @param hash of the asked tracklist.
@@ -54,10 +57,10 @@ public class TracklistManager {
     public static Tracklist get(Context context, String hash) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
         String query = " select tracklist.name, tracklistable_hash, " + SoundroidTrack.getFields() +
-                            " from tracklist_link" +
-                            " join tracklist on tracklist_link.tracklist_hash = tracklist.hash" +
-                            " left join track on tracklist_link.tracklistable_hash = track.hash" +
-                            " where tracklist.hash = ?";
+                " from tracklist_link" +
+                " join tracklist on tracklist_link.tracklist_hash = tracklist.hash" +
+                " left join track on tracklist_link.tracklistable_hash = track.hash" +
+                " where tracklist.hash = ?";
         Cursor cursor = db.rawQuery(query, new String[]{ hash });
         if (cursor.getCount() == 0) {
             return null;
@@ -108,6 +111,8 @@ public class TracklistManager {
         cursor.close();
         return true;
     }
+
+
 
     /**
      * Delete a tracklist and all links related to it in the database.

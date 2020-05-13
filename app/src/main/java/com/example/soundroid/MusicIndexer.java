@@ -57,8 +57,8 @@ public class MusicIndexer {
             while (cursor.moveToNext()) {
                 Track track = new Track(
                         cursor.getString(_artist),
-                        cursor.getString(_title),
                         cursor.getString(_album),
+                        cursor.getString(_title),
                         Integer.parseInt(cursor.getString(_albumId)), Integer.parseInt(cursor.getString(_trackId)), 320,
                         Long.parseLong(cursor.getString(_date) == null ? "0" : cursor.getString(_date)), 2, 40,
                         ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(_id)));
