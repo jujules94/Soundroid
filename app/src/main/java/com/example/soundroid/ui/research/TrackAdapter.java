@@ -1,4 +1,4 @@
-package com.example.soundroid.ui.gallery;
+package com.example.soundroid.ui.research;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;

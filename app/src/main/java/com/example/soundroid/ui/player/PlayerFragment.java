@@ -1,32 +1,49 @@
 package com.example.soundroid.ui.player;
 
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.soundroid.R;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class PlayerFragment extends Fragment {
+
+    private SharedPreferences sp;
+    private final String[] methods = new String[]{"GET", "POST"};
 
     private Handler threadHandler = new Handler();
     private MediaPlayer mediaPlayer;
@@ -42,6 +59,8 @@ public class PlayerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sp = getActivity().getSharedPreferences("PREFS", MODE_PRIVATE);
+
         if (getArguments() != null) {
             Log.d("Fragments", "retrieving arguments");
             tracks = (ArrayList<Track>) getArguments().get("tracks");
@@ -50,7 +69,7 @@ public class PlayerFragment extends Fragment {
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        View root = inflater.inflate(R.layout.fragment_player, container, false);
 
         title = root.findViewById(R.id.title);
         album = root.findViewById(R.id.album);
@@ -69,6 +88,9 @@ public class PlayerFragment extends Fragment {
         shuffle = root.findViewById(R.id.shuffle);
         nextSong = root.findViewById(R.id.nextSong);
 
+        FloatingActionButton fab = root.findViewById(R.id.fab);
+
+        fab.setOnClickListener(view -> shareTrack(tracks.get(currentIndex)));
         start.setOnClickListener(v -> doStartPause());
         rewind.setOnClickListener(v -> doRewind());
         forward.setOnClickListener(v -> doFastForward());
@@ -209,5 +231,55 @@ public class PlayerFragment extends Fragment {
         mp.reset();
         setupMediaPlayer(mp);
         setupSong(mp);
+    }
+
+    private void shareTrack(Track t) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Share the current track :");
+
+        final EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
+        Log.d("SHARE", sp.getString("PREFS_URL", "https://"));
+        if (sp.contains("PREFS_URL")) input.setText(sp.getString("PREFS_URL", null));
+        else input.setText("https://");
+        builder.setView(input);
+        builder.setSingleChoiceItems(methods, 0, null);
+        builder.setPositiveButton("SEND", (dialog, which) -> {
+            String URL = input.getText().toString();
+            int pos = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+            Log.d("SHARE", methods[pos] + " " + URL);
+            sp.edit()
+                    .putString("PREFS_URL", URL)
+                    .apply();
+            input.setText(URL);
+            request(URL, t, methods[pos].equals("GET") ? Request.Method.GET : Request.Method.POST);
+        });
+
+        builder.show();
+    }
+
+    public void request(String url, Track t, int request)  {
+        if (request != Request.Method.GET && request != Request.Method.POST) return;
+
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        if (request == Request.Method.GET) {
+            url += "?title="+t.getName()+"&artist="+t.getArtist()+"&album="+t.getAlbum();
+        }
+        StringRequest stringRequest = new StringRequest(request, url, response -> {
+            Toast.makeText(getContext(), "track shared !", Toast.LENGTH_LONG).show();
+            Log.d("SHARE", response);
+        }, error -> {
+            Log.d("SHARE", "error found ! " + error.toString() + " : " + error.networkResponse.statusCode);
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String>  params = new HashMap<>();
+                params.put("title", t.getName());
+                params.put("artist", t.getArtist());
+                params.put("album", t.getAlbum());
+                return params;
+            }
+        };
+        queue.add(stringRequest);
     }
 }
