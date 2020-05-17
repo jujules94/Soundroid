@@ -19,11 +19,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
 import com.example.soundroid.db.Tracklistable;
+import com.example.soundroid.io.StorageManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -56,11 +58,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("sddqs", "dsqsddqs");
         setContentView(R.layout.activity_main);
-        if (!checkPermissionForReadExternalStorage()) requestPermissionForReadExternalStorage();
+        if (!checkPermissionForReadExternalStorage()) {
+            requestPermissionForReadExternalStorage();
+        }
+        StorageManager.createSoundroidDirectory();
         MusicIndexer.indexMusic(this);
         tracks = TrackManager.getAll(getApplicationContext());
+        //SoundroidDbHelper.save(getApplicationContext(), "old-empty");
+        //SoundroidDbHelper.load(getApplicationContext(), "old-empty");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         sp = getSharedPreferences("PREFS", MODE_PRIVATE);

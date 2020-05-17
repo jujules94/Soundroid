@@ -5,17 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.example.soundroid.db.SoundroidContract.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 
 public class TrackManager {
 
@@ -104,9 +100,9 @@ public class TrackManager {
      * @param context of the database helper.
      * @return list of tracks
      */
-    public static List<Track> getAll(Context context) {
+    public static ArrayList<Track> getAll(Context context) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
-        List<Track> tracks = new ArrayList<>();
+        ArrayList<Track> tracks = new ArrayList<>();
         String[] projection = SoundroidContract.SoundroidTrack.getProjection();
         Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, null, null,null,null,null);
         Log.d("TrackManager", Arrays.toString(cursor.getColumnNames()));
@@ -190,12 +186,19 @@ public class TrackManager {
      * @param context of the database helper.
      * @param hashes of the tracks to remove
      */
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static void deleteAll(Context context, List<String> hashes) {
+        if (hashes.isEmpty()) {
+            throw new IllegalStateException();
+        }
         SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
-        StringJoiner joiner = new StringJoiner(",", "(", ")");
-        hashes.forEach(hash -> joiner.add("'" + hash + "'"));
-        String predicate = " in " + joiner.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        for (String hash : hashes) {
+            builder.append("'" + hash + "',");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append(")");
+        String predicate = " in " + builder.toString();
         db.delete(SoundroidTrack.TABLE_NAME,SoundroidTrack.COLUMN_NAME_HASH + predicate, null);
         db.delete(SoundroidTracklistLink.TABLE_NAME, SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH + predicate, null);
     }

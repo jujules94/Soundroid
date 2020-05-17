@@ -78,7 +78,7 @@ public class GalleryFragment extends Fragment implements TrackAdapter.OnTrackLis
             public void onClick(View v) {
                 String name = ((EditText) getView().findViewById(R.id.search_tracklist_name)).getText().toString();
                 Tracklist tracklist = new Tracklist(name, name, tracks);
-                if (TracklistManager.create(getContext(), tracklist)) {
+                if (TracklistManager.add(getContext(), tracklist)) {
                     Toast.makeText(getContext(), "The tracklist has been created !", 3 * 1000).show();
                 } else {
                     Toast.makeText(getContext(), "The tracklist can't be added. Name already taken or SQL error.", 3 * 1000).show();
