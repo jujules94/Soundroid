@@ -59,6 +59,13 @@ public final class SoundroidContract {
         public static final String COLUMN_NAME_TRACKLIST_HASH = "tracklist_hash";
         public static final String COLUMN_NAME_TRACKLISTABLE_HASH = "tracklistable_hash";
 
+        public static String[] getProjection() {
+            return new String[] {
+                    COLUMN_NAME_TRACKLIST_HASH,
+                    COLUMN_NAME_TRACKLISTABLE_HASH
+            };
+        }
+
     }
 
 }

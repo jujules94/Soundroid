@@ -3,7 +3,6 @@ package com.example.soundroid.ui.research;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,14 +60,13 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
                         spinner.equals("artist") ? filter : null,
                         spinner.equals("album") ? filter : null,
                         spinner.equals("title") ? filter : null);
-                Log.d("Search", tracks.toString());
-                trackAdapter.setTracks(tracks);
-                trackAdapter.notifyDataSetChanged();
                 if (!tracks.isEmpty()) {
+                    trackAdapter.setTracks(tracks);
+                    trackAdapter.notifyDataSetChanged();
                     createPlaylistLayout.setVisibility(TextView.VISIBLE);
                 } else {
                     createPlaylistLayout.setVisibility(TextView.INVISIBLE);
-                    Toast.makeText(getContext(), "No track found.", Toast.LENGTH_LONG);
+                    Toast.makeText(getContext(), "No track found.", 3 * 1000);
                 }
             }
         });
@@ -79,9 +78,9 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
                 String name = ((EditText) getView().findViewById(R.id.search_tracklist_name)).getText().toString();
                 Tracklist tracklist = new Tracklist(name, name, tracks);
                 if (TracklistManager.create(getContext(), tracklist)) {
-                    Toast.makeText(getContext(), "The tracklist has been created !", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "The tracklist has been created !", 3 * 1000).show();
                 } else {
-                    Toast.makeText(getContext(), "The tracklist can't be added. Name already taken or SQL error.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "The tracklist can't be added. Name already taken or SQL error.", 3 * 1000).show();
                 }
             }
         });
