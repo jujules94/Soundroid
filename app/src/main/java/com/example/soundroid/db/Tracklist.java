@@ -23,6 +23,11 @@ public class Tracklist implements Tracklistable {
         return hash;
     }
 
+    @Override
+    public boolean isTrack() {
+        return false;
+    }
+
     public String getName() {
         return name;
     }

@@ -39,7 +39,7 @@ public class TracklistLinkManager {
         ContentValues values = new ContentValues();
         values.put(SoundroidContract.SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH, link.getTracklistHash());
         values.put(SoundroidContract.SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH, link.getTracklistableHash());
-        return -1 == db.insert(SoundroidContract.SoundroidTrack.TABLE_NAME, null, values);
+        return -1 == db.insert(SoundroidContract.SoundroidTracklistLink.TABLE_NAME, null, values);
     }
 
     /** Convenience method to insert links into the database.

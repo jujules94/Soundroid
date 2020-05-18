@@ -40,6 +40,11 @@ public class Track implements Tracklistable {
         return hash;
     }
 
+    @Override
+    public boolean isTrack() {
+        return true;
+    }
+
     public String getName() {
         return name;
     }
