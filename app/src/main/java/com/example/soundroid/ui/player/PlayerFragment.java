@@ -1,6 +1,7 @@
 package com.example.soundroid.ui.player;
 
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -109,8 +110,15 @@ public class PlayerFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("Fragments", "destroy");
+        mediaPlayer.stop();
+    }
+
     private void setupMediaPlayer(MediaPlayer mp) {
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mp.setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
         mp.setOnCompletionListener(this::doComplete);
     }
 

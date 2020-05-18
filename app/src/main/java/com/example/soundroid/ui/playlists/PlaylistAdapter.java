@@ -1,5 +1,10 @@
 package com.example.soundroid.ui.playlists;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +16,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.soundroid.R;
 import com.example.soundroid.db.Tracklist;
-import com.example.soundroid.db.Tracklistable;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
     private final ClickListener listener;
-    private final List<Tracklistable> tracklistableList;
+    private List<Tracklist> tracklists;
+    private static Bitmap bitmapTracklist = null;
 
-    public PlaylistAdapter(List<Tracklistable> tracklistableList, ClickListener listener) {
+    public PlaylistAdapter(Context context, List<Tracklist> tracklistableList, ClickListener listener) {
         this.listener = listener;
-        this.tracklistableList = tracklistableList;
+        this.tracklists = tracklistableList;
+        bitmapTracklist = loadBitMap(context);
+    }
+
+    public void setTracklists(List<Tracklist> tracklists) {
+        this.tracklists = tracklists;
     }
 
     @NonNull
@@ -33,27 +46,34 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     }
 
     @Override public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.update(tracklistableList.get(position));
+        holder.update(tracklists.get(position));
     }
 
     @Override public int getItemCount() {
-        return tracklistableList.size();
+        return tracklists.size();
+    }
+
+    private Bitmap loadBitMap(Context context) {
+        Resources res = context.getResources();
+        int id = R.mipmap.tracklist;
+        return BitmapFactory.decodeResource(res, id);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView name, number;
-        private ImageView add, delete;
+        private ImageView add, delete, music;
         private WeakReference<ClickListener> listener;
 
         public ViewHolder(final View itemView, ClickListener listener) {
             super(itemView);
 
             this.listener = new WeakReference<>(listener);
-            name = (TextView) itemView.findViewById(R.id.tracklist_name);
-            number = (TextView) itemView.findViewById(R.id.tracklist_number_tracks);
-            add = (ImageView) itemView.findViewById(R.id.add);
-            delete = (ImageView) itemView.findViewById(R.id.delete);
+            name = itemView.findViewById(R.id.tracklist_name);
+            number = itemView.findViewById(R.id.tracklist_number_tracks);
+            add = itemView.findViewById(R.id.add);
+            delete = itemView.findViewById(R.id.delete);
+            music = itemView.findViewById(R.id.image);
 
             itemView.setOnClickListener(v -> {
                 listener.onItemClick(getAdapterPosition());
@@ -66,11 +86,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             });
         }
 
-        private void update(Tracklistable tracklistable) {
-            Tracklist list = (Tracklist) tracklistable;
+        private void update(Tracklist tracklist) {
+            Tracklist list = tracklist;
             int size = list.getTracklistables().size();
             name.setText(list.getName());
             number.setText(size + " song" + (size > 1 ? "s" : ""));
+            music.setImageBitmap(bitmapTracklist);
         }
     }
 
