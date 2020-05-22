@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.soundroid.db.SoundroidContract.SoundroidTrack;
 import com.example.soundroid.db.SoundroidContract.SoundroidTracklist;
@@ -72,8 +73,8 @@ public class TracklistManager {
     public static Tracklist get(Context context, String hash) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
         String query = " select tracklist.name, tracklistable_hash, " + SoundroidTrack.getFields() +
-                " from tracklist_link" +
-                " join tracklist on tracklist_link.tracklist_hash = tracklist.hash" +
+                " from tracklist" +
+                " left join tracklist_link on tracklist_link.tracklist_hash = tracklist.hash" +
                 " left join track on tracklist_link.tracklistable_hash = track.hash" +
                 " where tracklist.hash = ?";
         Cursor cursor = db.rawQuery(query, new String[]{ hash });
@@ -86,11 +87,15 @@ public class TracklistManager {
             if (name.equals("")) {
                 name =  cursor.getString(0);
             }
+            if (cursor.getString(1) == null) {
+                /** Element is an empty playlist */
+                continue;
+            }
             if (cursor.getString(3) == null) {
-                /* Element is a list */
+                /** Element is a list */
                 tracklistables.add(get(context, cursor.getString(1)));
             } else {
-                /* Element is a track */
+                /** Element is a track */
                 tracklistables.add(new Track(
                         cursor.getString(3),
                         cursor.getString(4),
@@ -109,6 +114,26 @@ public class TracklistManager {
         return new Tracklist(hash, name, tracklistables);
     }
 
+    /** Convenience method to add a track to a tracklist.
+     * @param context of the database helper.
+     * @param tracklist where the track must be added.
+     * @param track to be added.
+     * @return true is the track has been added, false otherwise.
+     */
+    public static boolean addTrack(Context context, Tracklist tracklist, Track track) {
+        /** search if track is already in tracklist */
+        for (Tracklistable tracklistable : tracklist.getTracklistables()) {
+            if (tracklistable.isTrack() && tracklistable.getHash().equals(track.getHash())) {
+                return false;
+            }
+        }
+        SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH, tracklist.getHash());
+        values.put(SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH, track.getHash());
+        return -1 == db.insert(SoundroidTracklistLink.TABLE_NAME, null, values);
+    }
+
     /** Convenience method to get all playlists from the database.
      * @param context of the database helper.
      * @return the playlists from the database.
@@ -116,8 +141,8 @@ public class TracklistManager {
     public static ArrayList<Tracklist> getAll(Context context) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
         String query = "select tracklist.name, tracklistable_hash, " + SoundroidTrack.getFields() +
-                " from tracklist_link" +
-                " join tracklist on tracklist_link.tracklist_hash = tracklist.hash" +
+                " from tracklist" +
+                " left join tracklist_link on tracklist_link.tracklist_hash = tracklist.hash" +
                 " left join track on tracklist_link.tracklistable_hash = track.hash";
         HashMap<String, ArrayList<Tracklistable>> map = new HashMap<>();
         Cursor cursor = db.rawQuery(query, null);
@@ -125,6 +150,10 @@ public class TracklistManager {
             String name =  cursor.getString(0);
             if (!map.containsKey(name)) {
                 map.put(name, new ArrayList<Tracklistable>());
+            }
+            if (cursor.getString(1) == null) {
+                /** Element is an empty playlist */
+                continue;
             }
             if (cursor.getString(3) == null) {
                 /** Element is a list */
@@ -153,8 +182,22 @@ public class TracklistManager {
         return tracklists;
     }
 
-    /**
-     * Test if the tracklist already exist in the database
+    /** Convenience method to get all tracks of a playlist.
+    * @param context of the database helper.
+    * @return list of tracks of the given tracklist b.
+    */
+    public static ArrayList<Track> getTracks(Context context, Tracklist tracklist) {
+        ArrayList<Track> tracks = new ArrayList<>();
+        List<Tracklistable> tracklistables = get(context, tracklist.getHash()).getTracklistables();
+        for (Tracklistable tracklistable : tracklistables) {
+            if (tracklistable.isTrack()) {
+                tracks.add((Track) tracklistable);
+            }
+        }
+        return tracks;
+    }
+
+    /** Test if the tracklist already exist in the database
      * @param context of the database helper.
      * @param tracklist to be tested.
      * @return true if the tracklist already exist, false otherwise.
@@ -171,8 +214,7 @@ public class TracklistManager {
         return true;
     }
 
-    /**
-     * Delete a tracklist and all links related to it in the database.
+    /** Delete a tracklist and all links related to it in the database.
      * @param context of the database helper.
      * @param hash of the tracklist.
      */
