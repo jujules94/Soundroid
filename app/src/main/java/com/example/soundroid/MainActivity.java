@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
@@ -95,6 +96,20 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.import_bdd:
+                //import
+                return true;
+            case R.id.export_bdd:
+                //export
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public List<Track> getAllTracks() {
