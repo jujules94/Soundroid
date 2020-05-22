@@ -3,6 +3,8 @@ package com.example.soundroid.db;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.Objects;
+
 public class Track implements Tracklistable {
 
     private final String hash;
@@ -112,5 +114,15 @@ public class Track implements Tracklistable {
                 ", uri=" + uri +
                 ", hash='" + hash + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Track track = (Track) o;
+        return name.equals(track.name) &&
+                artist.equals(track.artist) &&
+                album.equals(track.album);
     }
 }

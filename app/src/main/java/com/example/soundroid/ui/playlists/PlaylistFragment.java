@@ -1,5 +1,6 @@
 package com.example.soundroid.ui.playlists;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -28,7 +29,9 @@ import com.example.soundroid.ui.research.TrackAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -39,18 +42,20 @@ public class PlaylistFragment extends Fragment {
     private RecyclerView recyclerView;
     private MainActivity main;
     private List<Track> allTracks;
+    private OnTracklistClickListener listenerPlayer;
 
     private final PlaylistAdapter.ClickListener listener = new PlaylistAdapter.ClickListener() {
         @Override
         public void onItemClick(int pos) {  //set current playlist to player fragment
             Log.d("Playlist", "item click : " + pos);
+            listenerPlayer.playTracklistClicked(tracklists.get(pos));
         }
 
         @Override
         public void onAddClick(int pos) {   //add several song with a check-box dialog to the pos playlist
             Log.d("Playlist", "item add : " + pos);
             allTracks = main.getAllTracks();
-            addSongsToPlaylist(tracklists.get(pos));
+            addSongsToPlaylist(tracklists.get(pos), pos);
         }
 
         @Override
@@ -73,6 +78,17 @@ public class PlaylistFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
         return root;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listenerPlayer = (OnTracklistClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + "must implement the OnTrackClickListener interface");
+        }
     }
 
     private void addPlaylist() {
@@ -104,35 +120,34 @@ public class PlaylistFragment extends Fragment {
             // set message, title, and icon
             .setTitle("Delete " + tracklist.getName())
             .setMessage("Do you really want to delete this playlist ?")
-            .setIcon(R.drawable.ic_shuffle)
+            .setIcon(R.drawable.ic_delete)
 
             .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    //your deleting code
+                    tracklists.remove(tracklist);
+                    TracklistManager.delete(getContext(), tracklist.getHash());
+                    adapter.notifyDataSetChanged();
                 }
             })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-
-                }
-            })
+            .setNegativeButton("Cancel", null)
             .create();
         myQuittingDialogBox.show();
     }
 
-    private void addSongsToPlaylist(Tracklist tracklist) {
+    private void addSongsToPlaylist(Tracklist tracklist, int pos) {
         String[] allTracksString = allTracks.stream().map(track -> track.getName() + " - " + track.getArtist()).toArray(String[]::new);
-        ArrayList<Track> currentTracks = new ArrayList<>();
-        boolean[] TracksChecked = getTracksChecked(tracklist, currentTracks);
+        ArrayList<Track> currentTracks = TracklistManager.getTracks(getContext(), tracklist);
+        ArrayList<Track> newCurrentTracks = new ArrayList<>(currentTracks);
+        boolean[] TracksChecked = getTracksChecked(currentTracks, allTracks);
         AlertDialog dialog = new AlertDialog.Builder(getContext())
             .setTitle(tracklist.getName() + " : Choose some tracks to add")
             .setMultiChoiceItems(allTracksString, TracksChecked, new DialogInterface.OnMultiChoiceClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     Track t = allTracks.get(which);
-                    if (isChecked)currentTracks.add(t);
-                    else currentTracks.remove(t);
-                    Log.d("Playlist", "toAdd : " + currentTracks);
+                    if (isChecked) newCurrentTracks.add(t);
+                    else newCurrentTracks.remove(t);
+                    Log.d("Playlist", "toAdd : " + newCurrentTracks);
                 }
             })
 
@@ -140,6 +155,19 @@ public class PlaylistFragment extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Log.d("Playlist", "adding songs : " + currentTracks + "\nto : " + tracklist.getName());
+                    //check diff and put in two lists the songs to delete and the songs to add then proceed
+                    List<Track> adding = newCurrentTracks.stream().filter(e -> !currentTracks.contains(e)).collect(Collectors.toList());
+                    List<Track> deleting = currentTracks.stream().filter(e -> !newCurrentTracks.contains(e)).collect(Collectors.toList());
+                    for (Track t : adding) {
+                        TracklistManager.addTrack(getContext(), tracklist, t);
+                    }
+                    for (Track t : deleting) {
+                        //remove
+                        //TracklistManager.addTrack(getContext(), tracklist, t);
+                    }
+                    Tracklist tmp = TracklistManager.get(getContext(), tracklist.getHash());
+                    tracklists.set(pos, tmp);
+                    adapter.notifyItemChanged(pos);
                 }
             })
             .setNegativeButton("Cancel", null)
@@ -147,8 +175,18 @@ public class PlaylistFragment extends Fragment {
         dialog.show();
     }
 
-    private boolean[] getTracksChecked(Tracklist tracklist, ArrayList<Track> currentTracks) {
+    private boolean[] getTracksChecked(List<Track> currentTracks, List<Track> allTracks) {
+        Log.d("Playlist", "tracks : " + currentTracks);
+        boolean[] checked = new boolean[allTracks.size()];
+        for (int i = 0; i < allTracks.size(); i++) {
+            Track t = allTracks.get(i);
+            checked[i] = currentTracks.contains(t);
+        }
+        Log.d("Playlist", "checked : " + Arrays.toString(checked));
+        return checked;
+    }
 
-        return new boolean[0];
+    public interface OnTracklistClickListener {
+        public void playTracklistClicked(Tracklistable t);
     }
 }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class SoundroidDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 18;
     public static final String DATABASE_NAME = "Soundroid.db";
 
     private static final String SQL_CREATE_TRACK =
