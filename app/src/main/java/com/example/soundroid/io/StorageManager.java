@@ -1,4 +1,6 @@
 package com.example.soundroid.io;
+import android.util.Log;
+
 import com.example.soundroid.db.PortableDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -17,6 +19,7 @@ public class StorageManager {
 
     public static File getSoundroidDirectory() {
         File externalStorageRoot = android.os.Environment.getExternalStorageDirectory();
+        Log.d("#ancyis45", externalStorageRoot.getAbsolutePath());
         return new File(externalStorageRoot.getAbsolutePath() + "/Soundroid");
     }
 

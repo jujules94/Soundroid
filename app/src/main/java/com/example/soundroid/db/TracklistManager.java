@@ -5,14 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.example.soundroid.db.SoundroidContract.SoundroidTrack;
 import com.example.soundroid.db.SoundroidContract.SoundroidTracklist;
@@ -222,6 +219,64 @@ public class TracklistManager {
         SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
         db.delete(SoundroidTracklist.TABLE_NAME,SoundroidTracklist.COLUMN_NAME_HASH + " = ?", new String[]{ hash });
         db.delete(SoundroidTracklistLink.TABLE_NAME,SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH + " = ?", new String[]{ hash });
+    }
+
+    /** Convenience method to get all entries of tracklist from the database.
+     * @param context of the database helper.
+     * @return list of tracklist entries.
+     */
+    public static ArrayList<Tracklist> getRows(Context context) {
+        SoundroidDbHelper dbHelper = new SoundroidDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String[] projection = SoundroidTracklist.getProjection();
+        Cursor cursor = db.query(SoundroidTracklist.TABLE_NAME, projection, null, null,null,null,null);
+        ArrayList<Tracklist> tracklists = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            tracklists.add(new Tracklist(
+                    cursor.getString(0),
+                    cursor.getString(1)
+            ));
+        }
+        cursor.close();
+        return tracklists;
+    }
+
+    /** Convenience method to insert a tracklist into the database.
+     * @param context of the database helper.
+     * @param tracklist to be inserted.
+     * @return true if the row has been inserted, false otherwise.
+     */
+    private static boolean insertRow(Context context, Tracklist tracklist) {
+        SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SoundroidTracklist.COLUMN_NAME_HASH, tracklist.getHash());
+        values.put(SoundroidTracklist.COLUMN_NAME_NAME, tracklist.getName());
+        return -1 == db.insert(SoundroidTracklist.TABLE_NAME, null, values);
+    }
+
+    /** Convenience method to insert tracklists into the database.
+     * @param context of the database helper.
+     * @return true if rows has been inserted, false otherwise.
+     */
+    public static boolean insertRows(Context context, ArrayList<Tracklist> tracklists) {
+        for (Tracklist tracklist : tracklists) {
+            if (!insertRow(context, tracklist)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Delete a track from a tracklist.
+     * @param context of the database helper.
+     * @param tracklist that must me modified.
+     * @param track to be deleted.
+     */
+    public static void deleteTrackFromTracklist(Context context, Tracklist tracklist, Track track) {
+        SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
+        db.delete(SoundroidTracklistLink.TABLE_NAME,
+                SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH + " = ? and " + SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH + " = ? ",
+                new String[]{ tracklist.getHash(), track.getHash() });
     }
 
 }

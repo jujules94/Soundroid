@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import com.example.soundroid.db.SoundroidContract.SoundroidTracklistLink;
 
 import java.util.ArrayList;
 
@@ -37,9 +38,9 @@ public class TracklistLinkManager {
     private static boolean insertRow(Context context, TracklistLink link) {
         SQLiteDatabase db = new SoundroidDbHelper(context).getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(SoundroidContract.SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH, link.getTracklistHash());
-        values.put(SoundroidContract.SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH, link.getTracklistableHash());
-        return -1 == db.insert(SoundroidContract.SoundroidTracklistLink.TABLE_NAME, null, values);
+        values.put(SoundroidTracklistLink.COLUMN_NAME_TRACKLIST_HASH, link.getTracklistHash());
+        values.put(SoundroidTracklistLink.COLUMN_NAME_TRACKLISTABLE_HASH, link.getTracklistableHash());
+        return -1 == db.insert(SoundroidTracklistLink.TABLE_NAME, null, values);
     }
 
     /** Convenience method to insert links into the database.

@@ -51,6 +51,13 @@ public final class SoundroidContract {
         public static final String COLUMN_NAME_HASH = "hash";
         public static final String COLUMN_NAME_NAME = "name";
 
+        public static String[] getProjection() {
+            return new String[] {
+                    COLUMN_NAME_HASH,
+                    COLUMN_NAME_NAME
+            };
+        }
+
     }
 
     public static class SoundroidTracklistLink implements BaseColumns {

@@ -12,6 +12,10 @@ public class Tracklist implements Tracklistable {
     public Tracklist(String name) {
         this(name, name, new ArrayList<Tracklistable>());
     }
+
+    public Tracklist(String hash, String name) {
+        this(hash, name, new ArrayList<Tracklistable>());
+    }
     public Tracklist(String hash, String name, ArrayList<Tracklistable> tracklistables) {
         this.hash = hash;
         this.name = name;

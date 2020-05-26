@@ -1,6 +1,7 @@
 package com.example.soundroid;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,8 +9,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 
+import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
+import com.example.soundroid.db.Tracklist;
+import com.example.soundroid.db.TracklistManager;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.RequiresApi;
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         });
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        SoundroidDbHelper.load(getApplicationContext(), "save01");
+        SoundroidDbHelper.save(getApplicationContext(), "save02");
         indexerRunnable.run();
     }
 

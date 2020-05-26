@@ -86,20 +86,13 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
      * @return false if an error occurred, true otherwise
      */
     public static boolean save(Context context, String name) {
-        /*
-        RuntimeTypeAdapterFactory<Tracklistable> typeFactory = RuntimeTypeAdapterFactory
-                .of(Tracklistable.class, "type")
-                .registerSubtype(Track.class)
-                .registerSubtype(Tracklist.class);
-        Gson gson = new GsonBuilder().registerTypeAdapterFactory(typeFactory).create();
+        Gson gson = new GsonBuilder().create();
         String json = gson.toJson(new PortableDatabase(
                 TrackManager.getAll(context),
-                TracklistManager.getAll(context)
+                TracklistManager.getRows(context),
+                TracklistLinkManager.getRows(context)
         ));
-        /** create file
         return StorageManager.createJsonFile(name, json);
-         */
-        return false;
     }
 
     /** Replace current database by the given database in arguments.
@@ -109,17 +102,10 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
      * @return false if an error occurred, true otherwise
      */
     public static boolean load(Context context, String name) {
-        /*
         SQLiteDatabase db = new SoundroidDbHelper(context).getReadableDatabase();
         clear(db);
-        create(db);/
-        RuntimeTypeAdapterFactory<Tracklistable> typeFactory = RuntimeTypeAdapterFactory
-                .of(Tracklistable.class, "type")
-                .registerSubtype(Track.class)
-                .registerSubtype(Tracklist.class);
-        Gson gson = new GsonBuilder().registerTypeAdapterFactory(typeFactory).create();
-
-        //String json = StorageManager.readJsonFile(name);
+        create(db);
+        Gson gson = new GsonBuilder().create();
         PortableDatabase database = null;
         try {
             database = gson.fromJson(new FileReader(StorageManager.getSoundroidDirectory() + "/" + name + ".json"), PortableDatabase.class);
@@ -127,10 +113,9 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
             int a = 1;
         }
         TrackManager.addAll(context, database.getTracks());
-        TracklistManager.addAll(context, database.getTracklists());
+        TracklistManager.insertRows(context, database.getTracklists());
+        TracklistLinkManager.insertRows(context, database.getTracklistLinks());
         return true;
-        */
-        return false;
     }
 
 }
