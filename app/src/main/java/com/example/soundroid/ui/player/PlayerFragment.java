@@ -1,10 +1,13 @@
 package com.example.soundroid.ui.player;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -45,13 +48,14 @@ import static android.content.Context.MODE_PRIVATE;
 public class PlayerFragment extends Fragment {
 
     private SharedPreferences sp;
-    private final String[] methods = new String[]{"GET", "POST"};
+    private final static String[] methods = new String[]{"GET", "POST"};
+    private final static int percent_limit = 25;
 
     private Handler threadHandler = new Handler();
     private MediaPlayer mediaPlayer;
     private List<Track> tracks = new ArrayList<>();
     private int currentIndex = 0;
-    private boolean playing = false;
+    private boolean playing = false, toggleBreak = false;
 
     private TextView title, album, artist, current, max;
     private SeekBar seekBar;
@@ -150,9 +154,20 @@ public class PlayerFragment extends Fragment {
             album.setText(t.getAlbum());
             artist.setText(t.getArtist());
 
-            playing = false;
-            doStartPause();
+            if (!toggleBreak) {
+                playing = false;
+                doStartPause();
+            }
         });
+    }
+
+    private boolean enoughBatteryLevel() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = getContext().registerReceiver(null, ifilter);
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        float batteryPct = level * 100 / (float)scale;
+        return percent_limit < batteryPct;
     }
 
     // Convert millisecond to string.
@@ -163,6 +178,7 @@ public class PlayerFragment extends Fragment {
     }
 
     private void updateSongChangeButtons() {
+        toggleBreak = false;
         if (currentIndex == 0) previousSong.setEnabled(false);
         else previousSong.setEnabled(true);
         if (currentIndex == tracks.size()-1) nextSong.setEnabled(false);
@@ -225,6 +241,22 @@ public class PlayerFragment extends Fragment {
     class UpdateSeekBarThread implements Runnable {
 
         public void run()  {
+            if (!enoughBatteryLevel()) {
+                if (!toggleBreak) {
+                    toggleBreak = !toggleBreak;
+                    playing = true;
+                    doStartPause();
+                    start.setEnabled(false);
+                }
+            } else {
+                if (toggleBreak) {
+                    toggleBreak = !toggleBreak;
+                    playing = false;
+                    doStartPause();
+                    start.setEnabled(true);
+                }
+            }
+
             int currentPosition = mediaPlayer.getCurrentPosition();
             String currentPositionStr = millisecondsToString(currentPosition);
             current.setText(currentPositionStr);
