@@ -252,7 +252,8 @@ public class TracklistManager {
         ContentValues values = new ContentValues();
         values.put(SoundroidTracklist.COLUMN_NAME_HASH, tracklist.getHash());
         values.put(SoundroidTracklist.COLUMN_NAME_NAME, tracklist.getName());
-        return -1 == db.insert(SoundroidTracklist.TABLE_NAME, null, values);
+        db.insert(SoundroidTracklist.TABLE_NAME, null, values);
+        return true;
     }
 
     /** Convenience method to insert tracklists into the database.

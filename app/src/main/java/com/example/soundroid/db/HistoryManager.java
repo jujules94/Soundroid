@@ -27,7 +27,7 @@ public class HistoryManager {
         SoundroidDbHelper dbHelper = new SoundroidDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String[] projection = SoundroidHistory.getProjection();
-        Cursor cursor = db.query(SoundroidHistory.TABLE_NAME, projection, null, null,null,null,null);
+        Cursor cursor = db.query(SoundroidHistory.TABLE_NAME, projection, null, null,null,null,"date desc");
         ArrayList<History> histories = new ArrayList<>();
         while (cursor.moveToNext()) {
             histories.add(new History(
@@ -49,7 +49,8 @@ public class HistoryManager {
         ContentValues values = new ContentValues();
         values.put(SoundroidHistory.COLUMN_NAME_DATE, history.getDate());
         values.put(SoundroidHistory.COLUMN_NAME_TRACK_HASH, history.getHash());
-        return -1 == db.insert(SoundroidHistory.TABLE_NAME, null, values);
+        db.insert(SoundroidHistory.TABLE_NAME, null, values);
+        return true;
     }
 
     /** Convenience method to insert histories into the database.
