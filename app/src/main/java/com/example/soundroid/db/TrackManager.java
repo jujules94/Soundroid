@@ -105,7 +105,6 @@ public class TrackManager {
         ArrayList<Track> tracks = new ArrayList<>();
         String[] projection = SoundroidContract.SoundroidTrack.getProjection();
         Cursor cursor = db.query(SoundroidTrack.TABLE_NAME, projection, null, null,null,null,null);
-        Log.d("TrackManager", Arrays.toString(cursor.getColumnNames()));
         while (cursor.moveToNext()) {
             tracks.add(new Track(
                     cursor.getString(1),

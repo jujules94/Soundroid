@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class SoundroidDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 19;
     public static final String DATABASE_NAME = "Soundroid.db";
 
     private static final String SQL_CREATE_TRACK =
@@ -52,6 +52,13 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_DELETE_TRACKLIST_LINK = "DROP TABLE IF EXISTS " + SoundroidTracklistLink.TABLE_NAME;
 
+    private static final String SQL_CREATE_HISTORY =
+            "CREATE TABLE " + SoundroidHistory.TABLE_NAME + " (" +
+                    SoundroidHistory.COLUMN_NAME_DATE + " INTEGER PRIMARY KEY," +
+                    SoundroidHistory.COLUMN_NAME_TRACK_HASH + " TEXT)";
+
+    private static final String SQL_DELETE_HISTORY = "DROP TABLE IF EXISTS " + SoundroidHistory.TABLE_NAME;
+
     public SoundroidDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -63,16 +70,18 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
        create(db);
     }
 
-    private static void create(SQLiteDatabase db) {
+    public static void create(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_TRACK);
         db.execSQL(SQL_CREATE_TRACKLIST);
         db.execSQL(SQL_CREATE_TRACKLIST_LINK);
+        db.execSQL(SQL_CREATE_HISTORY);
     }
 
-    private static void clear(SQLiteDatabase db) {
+    public static void clear(SQLiteDatabase db) {
         db.execSQL(SQL_DELETE_TRACK);
         db.execSQL(SQL_DELETE_TRACKLIST);
         db.execSQL(SQL_DELETE_TRACKLIST_LINK);
+        db.execSQL(SQL_DELETE_HISTORY);
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -90,7 +99,8 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
         String json = gson.toJson(new PortableDatabase(
                 TrackManager.getAll(context),
                 TracklistManager.getRows(context),
-                TracklistLinkManager.getRows(context)
+                TracklistLinkManager.getRows(context),
+                HistoryManager.getRows(context)
         ));
         return StorageManager.createJsonFile(name, json);
     }
@@ -115,6 +125,7 @@ public class SoundroidDbHelper extends SQLiteOpenHelper {
         TrackManager.addAll(context, database.getTracks());
         TracklistManager.insertRows(context, database.getTracklists());
         TracklistLinkManager.insertRows(context, database.getTracklistLinks());
+        HistoryManager.insertRows(context, database.getHistories());
         return true;
     }
 

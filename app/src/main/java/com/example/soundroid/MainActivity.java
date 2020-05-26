@@ -8,12 +8,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 
+import com.example.soundroid.db.History;
+import com.example.soundroid.db.HistoryManager;
 import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
+import com.example.soundroid.db.Tracklistable;
+import com.example.soundroid.ui.playlists.PlaylistFragment;
+import com.example.soundroid.ui.research.ResearchFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.RequiresApi;
@@ -30,7 +36,7 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PlaylistFragment.OnTracklistClickListener, ResearchFragment.OnTrackClickListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private Handler handler = new Handler();
@@ -67,8 +73,10 @@ public class MainActivity extends AppCompatActivity {
         });
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        SoundroidDbHelper.load(getApplicationContext(), "save01");
-        SoundroidDbHelper.save(getApplicationContext(), "save02");
+
+
+        //HistoryManager.add(context, new History(11532313, ));
+
         indexerRunnable.run();
     }
 
@@ -103,9 +111,24 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.import_bdd:
+                //import
+                return true;
+            case R.id.export_bdd:
+                //export
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     public List<Track> getAllTracks() {
         return allTracks;
     }
+    public List<Track> getSelectedTracks() {return selectedTracks;}
 
     private Runnable indexerRunnable = () -> {
         MusicIndexer.indexMusic(this);
@@ -116,5 +139,25 @@ public class MainActivity extends AppCompatActivity {
     /** Required to allow recursive call from increment runnable */
     private Runnable getIndexerRunnable() {
         return indexerRunnable;
+    }
+
+    @Override
+    public void playTracklistClicked(Tracklistable t) {
+        Log.d("Fragments", "tracklist clicked : " + t.isTrack());
+        if (!t.isTrack()) {
+            Tracklist list = (Tracklist) t;
+            ArrayList<Track> tmp = TracklistManager.getTracks(this, list);
+            selectedTracks = tmp;
+        }
+    }
+
+    @Override
+    public void playTrackClicked(Tracklistable t) {
+        Log.d("Fragments", "track clicked : " + t.isTrack());
+        if (t.isTrack()) {
+            ArrayList<Track> tmp = new ArrayList<>();
+            tmp.add((Track) t);
+            selectedTracks = tmp;
+        }
     }
 }

@@ -8,11 +8,13 @@ public class PortableDatabase {
     private final ArrayList<Track> tracks;
     private final ArrayList<Tracklist> tracklists;
     private final ArrayList<TracklistLink> tracklistLinks;
+    private final ArrayList<History> histories;
 
-    public PortableDatabase(ArrayList<Track> tracks, ArrayList<Tracklist> tracklists, ArrayList<TracklistLink> tracklistLinks) {
+    public PortableDatabase(ArrayList<Track> tracks, ArrayList<Tracklist> tracklists, ArrayList<TracklistLink> tracklistLinks, ArrayList<History> histories) {
         this.tracks = tracks;
         this.tracklists = tracklists;
         this.tracklistLinks = tracklistLinks;
+        this.histories = histories;
     }
 
     public static PortableDatabase fromJSON(String json) {
@@ -29,6 +31,10 @@ public class PortableDatabase {
 
     public ArrayList<TracklistLink> getTracklistLinks() {
         return tracklistLinks;
+    }
+
+    public ArrayList<History> getHistories() {
+        return histories;
     }
 
 }

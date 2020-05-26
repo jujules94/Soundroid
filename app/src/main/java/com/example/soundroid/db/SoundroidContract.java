@@ -75,4 +75,19 @@ public final class SoundroidContract {
 
     }
 
+    public static class SoundroidHistory implements BaseColumns {
+
+        public static final String TABLE_NAME = "history";
+        public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_TRACK_HASH = "track_hash";
+
+        public static String[] getProjection() {
+            return new String[] {
+                    COLUMN_NAME_DATE,
+                    COLUMN_NAME_TRACK_HASH
+            };
+        }
+
+    }
+
 }

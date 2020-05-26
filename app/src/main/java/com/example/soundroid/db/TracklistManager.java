@@ -103,7 +103,7 @@ public class TracklistManager {
                         cursor.getLong(9),
                         cursor.getInt(10),
                         cursor.getInt(11),
-                        Uri.parse(cursor.getString(12))
+                        Uri.parse(cursor.getString(14))
                 ));
             }
         };
@@ -167,8 +167,8 @@ public class TracklistManager {
                         cursor.getLong(9),
                         cursor.getInt(10),
                         cursor.getInt(11),
-                        Uri.parse(cursor.getString(12))
-                ));
+                        Uri.parse(cursor.getString(14))
+                  ));
             }
         };
         cursor.close();
@@ -188,6 +188,7 @@ public class TracklistManager {
         List<Tracklistable> tracklistables = get(context, tracklist.getHash()).getTracklistables();
         for (Tracklistable tracklistable : tracklistables) {
             if (tracklistable.isTrack()) {
+                //Log.d("TrackListManager", "track : " + (Track) tracklistable);
                 tracks.add((Track) tracklistable);
             }
         }

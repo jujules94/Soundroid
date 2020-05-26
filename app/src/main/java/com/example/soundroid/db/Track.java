@@ -3,6 +3,8 @@ package com.example.soundroid.db;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.Objects;
+
 public class Track implements Tracklistable {
 
     private final String hash;
@@ -17,7 +19,7 @@ public class Track implements Tracklistable {
     private final int seconds;
     private final int mark;
     private final int numberOfClick;
-    private final Uri uri;
+    private final String uri;
 
     public Track(String artist, String album, String name, int diskNumber, int trackNumber, int bitrate, long date, int minutes, int seconds, Uri uri) {
         this.name = name;
@@ -31,7 +33,7 @@ public class Track implements Tracklistable {
         this.seconds = seconds;
         this.mark = 0;
         this.numberOfClick = 0;
-        this.uri = uri;
+        this.uri = uri.toString();
         this.hash = generateHash();
     }
 
@@ -88,7 +90,7 @@ public class Track implements Tracklistable {
     public int getNumberOfClick() { return numberOfClick; }
 
     public Uri getUri() {
-        return uri;
+        return Uri.parse(uri);
     }
 
     public String generateHash() {
@@ -112,5 +114,15 @@ public class Track implements Tracklistable {
                 ", uri=" + uri +
                 ", hash='" + hash + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Track track = (Track) o;
+        return name.equals(track.name) &&
+                artist.equals(track.artist) &&
+                album.equals(track.album);
     }
 }
