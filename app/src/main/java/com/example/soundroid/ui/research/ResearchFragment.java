@@ -1,5 +1,6 @@
 package com.example.soundroid.ui.research;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.soundroid.R;
+import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
@@ -39,6 +41,7 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
     private LinearLayout createPlaylistLayout;
     private EditText createPlaylistText;
     private Button createPlaylistButton;
+    private OnTrackClickListener listener;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -107,10 +110,19 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (OnTrackClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + "must implement the OnTrackClickListener interface");
+        }
+    }
+
+    @Override
     public void onTrackClick(int position) {
-        // to do
-        // L'utilisateur viens de cliquer sur une musique.
-        // il faut que le player lance la musique et qu'on retourne sur l'affichage du player.
+        listener.playTrackClicked(tracks.get(position));
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -118,4 +130,7 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
         return root;
     }
 
+    public interface OnTrackClickListener {
+        public void playTrackClicked(Tracklistable t);
+    }
 }

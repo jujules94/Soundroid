@@ -19,7 +19,6 @@ public class StorageManager {
 
     public static File getSoundroidDirectory() {
         File externalStorageRoot = android.os.Environment.getExternalStorageDirectory();
-        Log.d("#ancyis45", externalStorageRoot.getAbsolutePath());
         return new File(externalStorageRoot.getAbsolutePath() + "/Soundroid");
     }
 

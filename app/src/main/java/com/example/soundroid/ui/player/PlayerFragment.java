@@ -27,6 +27,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.soundroid.MainActivity;
 import com.example.soundroid.R;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
@@ -48,7 +49,7 @@ public class PlayerFragment extends Fragment {
 
     private Handler threadHandler = new Handler();
     private MediaPlayer mediaPlayer;
-    private List<Track> tracks;
+    private List<Track> tracks = new ArrayList<>();
     private int currentIndex = 0;
     private boolean playing = false;
 
@@ -56,21 +57,18 @@ public class PlayerFragment extends Fragment {
     private SeekBar seekBar;
     private Button rewind, start, forward;
     private ImageButton previousSong, shuffle, nextSong;
+    private MainActivity main;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sp = getActivity().getSharedPreferences("PREFS", MODE_PRIVATE);
-
-        if (getArguments() != null) {
-            Log.d("Fragments", "retrieving arguments");
-            tracks = (ArrayList<Track>) getArguments().get("tracks");
-        }
-        tracks = TrackManager.getAll(getContext());
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_player, container, false);
+        main = (MainActivity) getActivity();
+        tracks = main.getSelectedTracks();
 
         title = root.findViewById(R.id.title);
         album = root.findViewById(R.id.album);
@@ -91,6 +89,7 @@ public class PlayerFragment extends Fragment {
 
         FloatingActionButton fab = root.findViewById(R.id.fab);
 
+        if (tracks.size() == 0) return root;
         fab.setOnClickListener(view -> shareTrack(tracks.get(currentIndex)));
         start.setOnClickListener(v -> doStartPause());
         rewind.setOnClickListener(v -> doRewind());
@@ -114,7 +113,7 @@ public class PlayerFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d("Fragments", "destroy");
-        mediaPlayer.stop();
+        if (mediaPlayer != null) mediaPlayer.stop();
     }
 
     private void setupMediaPlayer(MediaPlayer mp) {

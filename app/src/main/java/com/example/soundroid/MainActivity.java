@@ -73,10 +73,6 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         });
         NavigationUI.setupWithNavController(navigationView, navController);
 
-
-
-        //HistoryManager.add(context, new History(11532313, ));
-
         indexerRunnable.run();
     }
 

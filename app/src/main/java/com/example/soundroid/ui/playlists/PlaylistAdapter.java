@@ -86,9 +86,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             });
         }
 
-        private void update(Tracklist tracklist) {
-            Tracklist list = tracklist;
+        private void update(Tracklist list) {
             int size = list.getTracklistables().size();
+            Log.d("AdapterPlaylist", "update size : " + size);
             name.setText(list.getName());
             number.setText(size + " song" + (size > 1 ? "s" : ""));
             music.setImageBitmap(bitmapTracklist);
