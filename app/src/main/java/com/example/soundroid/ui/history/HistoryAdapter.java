@@ -19,9 +19,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
-    SimpleDateFormat formater = new SimpleDateFormat("'played 'h' hour(s) 'mm' min ago'");
     private ArrayList<History> historys;
     private final Context context;
 
@@ -50,8 +50,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             titleView.setText(track.getName());
             Date now = new Date();
             long diffInMillies = Math.abs(now.getTime() - history.getDate());
-            Date diff = new Date(diffInMillies);
-            time.setText(formater.format(diff));
+            time.setText(String.format("played %02d hour(s), %02d min ago",
+                    TimeUnit.MILLISECONDS.toHours(diffInMillies),
+                    TimeUnit.MILLISECONDS.toMinutes(diffInMillies) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(diffInMillies))
+            ));
 
         }
     }

@@ -72,16 +72,16 @@ public class TrackManager {
             return null;
         };
         Track track = new Track(
-                cursor.getString(0),
                 cursor.getString(1),
                 cursor.getString(2),
-                cursor.getInt(3),
+                cursor.getString(3),
                 cursor.getInt(4),
                 cursor.getInt(5),
-                cursor.getLong(6),
-                cursor.getInt(7),
+                cursor.getInt(6),
+                cursor.getLong(7),
                 cursor.getInt(8),
-                Uri.parse(cursor.getString(9)));
+                cursor.getInt(9),
+                Uri.parse(cursor.getString(12)));
         cursor.close();
         return track;
     }
