@@ -1,5 +1,6 @@
 package com.example.soundroid.ui.player;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -32,6 +33,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.soundroid.MainActivity;
 import com.example.soundroid.R;
+import com.example.soundroid.db.HistoryManager;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -133,23 +135,25 @@ public class PlayerFragment extends Fragment {
     }
 
     private void setupSong(MediaPlayer mp) {
+        Track t = tracks.get(currentIndex);
         try {
-            Uri uri = tracks.get(currentIndex).getUri();
+            Uri uri = t.getUri();
             Log.d("Fragments", "tracks : " + tracks);
-            Log.d("Fragments", "media selected : " + tracks.get(currentIndex) + ", source : " + uri);
+            Log.d("Fragments", "media selected : " + t + ", source : " + uri);
             mp.setDataSource(getContext(), uri);
             mp.prepareAsync();
         } catch(Exception e) {
             Log.e("Fragments", "Error Play Local Media: "+ e.getMessage());
             e.printStackTrace();
         }
+        Log.d("History Player", t.toString());
+        HistoryManager.add(getContext(), t);
         mp.setOnPreparedListener(media -> {
             int duration = media.getDuration();
             this.seekBar.setMax(duration);
             String maxTimeString = this.millisecondsToString(duration);
             max.setText(maxTimeString);
 
-            Track t = tracks.get(currentIndex);
             title.setText(t.getName());
             album.setText(t.getAlbum());
             artist.setText(t.getArtist());

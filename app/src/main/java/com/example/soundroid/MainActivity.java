@@ -1,6 +1,7 @@
 package com.example.soundroid;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,12 +13,14 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.soundroid.db.History;
 import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
 import com.example.soundroid.db.Tracklistable;
+import com.example.soundroid.ui.player.PlayerFragment;
 import com.example.soundroid.ui.playlists.PlaylistFragment;
 import com.example.soundroid.ui.research.ResearchFragment;
 import com.google.android.material.navigation.NavigationView;
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_history)
                 .setDrawerLayout(drawer)
                 .build();
 
