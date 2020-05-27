@@ -13,9 +13,7 @@ import com.example.soundroid.R;
 import com.example.soundroid.db.History;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
-import com.example.soundroid.db.Tracklistable;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,7 +43,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
         private void update(History history) {
             Track track = TrackManager.get(context, history.getHash());
-            Log.d("History", track.toString());
             artistAndAlbumView.setText(track.getArtist() + ", " + track.getAlbum());
             titleView.setText(track.getName());
             Date now = new Date();
@@ -73,14 +70,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     @Override
     public int getItemCount() {
         return historys.size();
-    }
-
-    public List<History> getHistorys() {
-        return historys;
-    }
-
-    public void setHistorys(ArrayList<History> historys) {
-        this.historys = historys;
     }
 
 }

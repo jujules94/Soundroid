@@ -12,29 +12,23 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.soundroid.MainActivity;
 import com.example.soundroid.R;
 import com.example.soundroid.db.History;
 import com.example.soundroid.db.HistoryManager;
-import com.example.soundroid.db.Track;
-import com.example.soundroid.ui.player.PlayerFragment;
 
 import java.util.ArrayList;
 
 public class HistoryFragment extends Fragment {
 
-    private ArrayList<History> historys;
     private Handler handler = new Handler();
     private HistoryAdapter adapter;
-    private RecyclerView recyclerView;
-    private TextView number;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_history, container, false);
-        historys = HistoryManager.getRows(getContext());
+        ArrayList<History> historys = HistoryManager.getRows(getContext());
         adapter = new HistoryAdapter(historys, getContext());
-        recyclerView = root.findViewById(R.id.recycler_hystory);
-        number = root.findViewById(R.id.nb);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler_hystory);
+        TextView number = root.findViewById(R.id.nb);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
         number.setText("Tracks played : " + historys.size());

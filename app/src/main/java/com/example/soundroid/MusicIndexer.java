@@ -3,10 +3,7 @@ package com.example.soundroid;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Build;
 import android.provider.MediaStore;
-
-import androidx.annotation.RequiresApi;
 
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
@@ -17,12 +14,11 @@ import java.util.List;
 public class MusicIndexer {
 
     /** Method to extract tracks from the file system.
-     * @param context of the database helper.
-     * @return list of tracks
+     * @param context of the database helper
      */
     public static void indexMusic(Context context) {
         List<String> hashes = TrackManager.getHashes(context);
-        List<Track> tracksToAdd = new ArrayList<Track>();
+        List<Track> tracksToAdd = new ArrayList<>();
         String[] projection = new String[] {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.ARTIST,

@@ -2,7 +2,7 @@ package com.example.soundroid.ui.playlists;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -13,19 +13,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
 import com.example.soundroid.MainActivity;
 import com.example.soundroid.R;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
 import com.example.soundroid.db.Tracklistable;
-import com.example.soundroid.ui.research.TrackAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -33,13 +32,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static android.content.Context.MODE_PRIVATE;
-
 public class PlaylistFragment extends Fragment {
 
     private List<Tracklist> tracklists;
     private PlaylistAdapter adapter;
-    private RecyclerView recyclerView;
     private MainActivity main;
     private List<Track> allTracks;
     private OnTracklistClickListener listenerPlayer;
@@ -51,6 +47,7 @@ public class PlaylistFragment extends Fragment {
             listenerPlayer.playTracklistClicked(tracklists.get(pos));
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onAddClick(int pos) {   //add several song with a check-box dialog to the pos playlist
             Log.d("Playlist", "item add : " + pos);
@@ -74,14 +71,14 @@ public class PlaylistFragment extends Fragment {
         tracklists = TracklistManager.getAll(getContext());
         Log.d("Playlist", "playlists : " + tracklists);
         adapter = new PlaylistAdapter(getContext(), tracklists, listener);
-        recyclerView = root.findViewById(R.id.recycler);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
         return root;
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             listenerPlayer = (OnTracklistClickListener) context;
@@ -122,18 +119,17 @@ public class PlaylistFragment extends Fragment {
             .setMessage("Do you really want to delete this playlist ?")
             .setIcon(R.drawable.ic_delete)
 
-            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    tracklists.remove(tracklist);
-                    TracklistManager.delete(getContext(), tracklist.getHash());
-                    adapter.notifyDataSetChanged();
-                }
+            .setPositiveButton("Delete", (dialog, whichButton) -> {
+                tracklists.remove(tracklist);
+                TracklistManager.delete(getContext(), tracklist.getHash());
+                adapter.notifyDataSetChanged();
             })
             .setNegativeButton("Cancel", null)
             .create();
         myQuittingDialogBox.show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void addSongsToPlaylist(Tracklist tracklist, int pos) {
         String[] allTracksString = allTracks.stream().map(track -> track.getName() + " - " + track.getArtist()).toArray(String[]::new);
         ArrayList<Track> currentTracks = TracklistManager.getTracks(getContext(), tracklist);
@@ -186,6 +182,6 @@ public class PlaylistFragment extends Fragment {
     }
 
     public interface OnTracklistClickListener {
-        public void playTracklistClicked(Tracklistable t);
+        void playTracklistClicked(Tracklistable t);
     }
 }

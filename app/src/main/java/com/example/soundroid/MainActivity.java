@@ -1,7 +1,6 @@
 package com.example.soundroid;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,14 +12,12 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.soundroid.db.History;
 import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
 import com.example.soundroid.db.Tracklistable;
-import com.example.soundroid.ui.player.PlayerFragment;
 import com.example.soundroid.ui.playlists.PlaylistFragment;
 import com.example.soundroid.ui.research.ResearchFragment;
 import com.google.android.material.navigation.NavigationView;
@@ -176,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         Log.d("Fragments", "tracklist clicked : " + t.isTrack());
         if (!t.isTrack()) {
             Tracklist list = (Tracklist) t;
-            ArrayList<Track> tmp = TracklistManager.getTracks(this, list);
-            selectedTracks = tmp;
+            selectedTracks = TracklistManager.getTracks(this, list);
         }
     }
 

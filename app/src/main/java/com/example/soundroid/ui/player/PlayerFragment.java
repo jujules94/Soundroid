@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -35,7 +34,6 @@ import com.example.soundroid.MainActivity;
 import com.example.soundroid.R;
 import com.example.soundroid.db.HistoryManager;
 import com.example.soundroid.db.Track;
-import com.example.soundroid.db.TrackManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -65,6 +63,8 @@ public class PlayerFragment extends Fragment {
     private ImageButton previousSong, shuffle, nextSong;
     private MainActivity main;
 
+    private Context context;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +75,7 @@ public class PlayerFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_player, container, false);
         main = (MainActivity) getActivity();
         tracks = main.getSelectedTracks();
+        context = getContext();
 
         title = root.findViewById(R.id.title);
         album = root.findViewById(R.id.album);
@@ -167,7 +168,7 @@ public class PlayerFragment extends Fragment {
 
     private boolean enoughBatteryLevel() {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = getContext().registerReceiver(null, ifilter);
+        Intent batteryStatus = context.registerReceiver(null, ifilter);
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         float batteryPct = level * 100 / (float)scale;
@@ -243,7 +244,6 @@ public class PlayerFragment extends Fragment {
 
     // Thread to Update position for SeekBar.
     class UpdateSeekBarThread implements Runnable {
-
         public void run()  {
             if (!enoughBatteryLevel()) {
                 if (!toggleBreak) {

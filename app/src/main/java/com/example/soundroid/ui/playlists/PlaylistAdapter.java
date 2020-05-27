@@ -17,9 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.soundroid.R;
 import com.example.soundroid.db.Tracklist;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -75,15 +72,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             delete = itemView.findViewById(R.id.delete);
             music = itemView.findViewById(R.id.image);
 
-            itemView.setOnClickListener(v -> {
-                listener.onItemClick(getAdapterPosition());
-            });
-            add.setOnClickListener(v -> {
-                listener.onAddClick(getAdapterPosition());
-            });
-            delete.setOnClickListener(v -> {
-                listener.onDeleteClick(getAdapterPosition());
-            });
+            itemView.setOnClickListener(v -> listener.onItemClick(getAdapterPosition()));
+            add.setOnClickListener(v -> listener.onAddClick(getAdapterPosition()));
+            delete.setOnClickListener(v -> listener.onDeleteClick(getAdapterPosition()));
         }
 
         private void update(Tracklist list) {

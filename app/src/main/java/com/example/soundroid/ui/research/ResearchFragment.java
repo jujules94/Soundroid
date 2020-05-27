@@ -17,12 +17,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.soundroid.R;
-import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
 import com.example.soundroid.db.Tracklist;
 import com.example.soundroid.db.TracklistManager;
@@ -34,7 +32,6 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
 
     private ArrayList<Tracklistable> tracks = new ArrayList<>();
     private TrackAdapter trackAdapter;
-    private RecyclerView recyclerView;
     private EditText searchTracksText;
     private Spinner searchTracksSpinner;
     private Button searchTracksButton;
@@ -45,12 +42,12 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        this.searchTracksText = (EditText) view.findViewById(R.id.search_filter);
-        this.searchTracksSpinner = (Spinner) view.findViewById(R.id.search_spinner);
-        this.searchTracksButton = (Button) getView().findViewById(R.id.search_button);
-        this.createPlaylistLayout = (LinearLayout) view.findViewById(R.id.create_tracklist_layout);
-        this.createPlaylistText = (EditText) getView().findViewById(R.id.search_tracklist_name);
-        this.createPlaylistButton = (Button) getView().findViewById(R.id.search_create_tracklist);
+        this.searchTracksText = view.findViewById(R.id.search_filter);
+        this.searchTracksSpinner = view.findViewById(R.id.search_spinner);
+        this.searchTracksButton = getView().findViewById(R.id.search_button);
+        this.createPlaylistLayout = view.findViewById(R.id.create_tracklist_layout);
+        this.createPlaylistText = getView().findViewById(R.id.search_tracklist_name);
+        this.createPlaylistButton = getView().findViewById(R.id.search_create_tracklist);
         /* initialize fields */
         createPlaylistLayout.setVisibility(TextView.INVISIBLE);
         searchTracksButton.setOnClickListener(new View.OnClickListener() {
@@ -69,7 +66,7 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
                     createPlaylistLayout.setVisibility(TextView.VISIBLE);
                 } else {
                     createPlaylistLayout.setVisibility(TextView.INVISIBLE);
-                    Toast.makeText(getContext(), "No track found.", 3 * 1000);
+                    Toast.makeText(getContext(), "No track found.", 3 * 1000).show();
                 }
             }
         });
@@ -87,7 +84,7 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
                 }
             }
         });
-        /** Deactivate button if playlist name is empty */
+        //Deactivate button if playlist name is empty
         createPlaylistText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -104,13 +101,13 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
         });
         /* run RecyclerView */
         trackAdapter = new TrackAdapter(new ArrayList<>(), this);
-        recyclerView = (RecyclerView) getView().findViewById(R.id.search_recyclerview);
+        RecyclerView recyclerView = getView().findViewById(R.id.search_recyclerview);
         recyclerView.setAdapter(trackAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             listener = (OnTrackClickListener) context;
@@ -126,11 +123,10 @@ public class ResearchFragment extends Fragment implements TrackAdapter.OnTrackLi
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_research, container, false);
-        return root;
+        return inflater.inflate(R.layout.fragment_research, container, false);
     }
 
     public interface OnTrackClickListener {
-        public void playTrackClicked(Tracklistable t);
+        void playTrackClicked(Tracklistable t);
     }
 }
