@@ -1,17 +1,17 @@
 package com.example.soundroid;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.soundroid.db.History;
-import com.example.soundroid.db.HistoryManager;
 import com.example.soundroid.db.SoundroidDbHelper;
 import com.example.soundroid.db.Track;
 import com.example.soundroid.db.TrackManager;
@@ -23,6 +23,7 @@ import com.example.soundroid.ui.research.ResearchFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!checkPermissionForReadExternalStorage()) requestPermissionForReadExternalStorage();
+        if (!checkPermission()) requestPermission();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -76,17 +77,18 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         indexerRunnable.run();
     }
 
-    private boolean checkPermissionForReadExternalStorage() {
+    private boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             int result = this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
-            return result == PackageManager.PERMISSION_GRANTED;
+            int result2 = this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            return result == PackageManager.PERMISSION_GRANTED && result2 == PackageManager.PERMISSION_GRANTED;
         }
         return false;
     }
 
-    private void requestPermissionForReadExternalStorage() {
+    private void requestPermission() {
         try {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -112,13 +114,42 @@ public class MainActivity extends AppCompatActivity implements PlaylistFragment.
         switch (item.getItemId()) {
             case R.id.import_bdd:
                 //import
+                selectFilename(true);
                 return true;
             case R.id.export_bdd:
                 //export
+                selectFilename(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void selectFilename(boolean isImport) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(isImport ? "Import a json file to update the database " : "Export the database : ");
+
+        final EditText input = new EditText(this);
+        input.setText(".json");
+        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        input.setHint("type the name of the file to " + (isImport ? "import" : "export"));
+        builder.setView(input);
+        builder.setPositiveButton("CREATE", (dialog, which) -> {
+            String name = input.getText().toString();
+            if (name.endsWith(".json")) {
+                int index = name.indexOf(".json");
+                name = name.substring(0, index);
+                Log.d("Import", index + " " + name);
+            }
+            if (isImport) {
+                SoundroidDbHelper.load(this, name);
+                Toast.makeText(this, "database loaded !", Toast.LENGTH_LONG).show();
+            } else {
+                SoundroidDbHelper.save(this, name);
+                Toast.makeText(this, "database exported !", Toast.LENGTH_LONG).show();
+            }
+        });
+        builder.show();
     }
 
     public List<Track> getAllTracks() {

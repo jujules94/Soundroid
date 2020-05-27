@@ -162,8 +162,7 @@ public class PlaylistFragment extends Fragment {
                         TracklistManager.addTrack(getContext(), tracklist, t);
                     }
                     for (Track t : deleting) {
-                        //remove
-                        //TracklistManager.addTrack(getContext(), tracklist, t);
+                        TracklistManager.deleteTrackFromTracklist(getContext(), tracklist, t);
                     }
                     Tracklist tmp = TracklistManager.get(getContext(), tracklist.getHash());
                     tracklists.set(pos, tmp);
